@@ -462,6 +462,21 @@
     const $bubble = q("#bubble"), $cards = q("#cards"), $child = q("#child"), $av = q("#av");
     const addLog = (who, text) => log.push({ t: Math.round((Date.now() - t0) / 1000), who, text });
 
+    // 정한 시간이나 횟수가 되면 "체험 끝" 버튼을 반짝이게 (연구자 안내용)
+    const hint = f.endHint || {};
+    let hintAt = null;
+    const hintTimer = setInterval(() => {
+      const end = q("#end");
+      if (!end) return clearInterval(hintTimer);
+      const turns = log.filter((l) => l.who === "아이").length;
+      const secs = (Date.now() - t0) / 1000;
+      if ((hint.seconds && secs >= hint.seconds) || (hint.turns && turns >= hint.turns)) {
+        if (!hintAt) hintAt = Math.round(secs);
+        end.classList.add("glow");
+        clearInterval(hintTimer);
+      }
+    }, 500);
+
     function thinking() {
       $bubble.innerHTML = `<span class="dots"><span></span><span></span><span></span></span>`;
       $cards.classList.add("waiting");
@@ -647,6 +662,8 @@
       judgeScreen(n, {
         시작시각: new Date(t0).toLocaleString("sv-SE").slice(0, 19),
         체험시간_초: Math.round((Date.now() - t0) / 1000),
+        끝내기안내_기준: hint.turns ? `${hint.turns}번` : hint.seconds ? `${hint.seconds}초` : "",
+        끝내기안내_시점_초: hintAt ?? "",
         아이_입력횟수: childTurns,
         설정_대기시간_ms: C.RESPONSE_DELAY_MS,
         실제_처리시간_최대ms: latencies.length ? Math.max(...latencies) : 0,
