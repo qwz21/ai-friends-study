@@ -25,6 +25,7 @@ const SYSTEM_PROMPT = [
   '- say: 반말로 1~2문장, 40자 안팎. 1학년이 아는 쉬운 낱말만 써.',
   '- 아이가 누른 카드 내용에 맞게 대답하고, 앞에서 나온 이야기를 기억해서 이어 가.',
   '- 같은 말을 되풀이하지 말고 매번 조금씩 다르게 말해.',
+  '- 아이가 전에 골랐던 카드를 또 고르면 "아까도 ○○ 골랐지?"처럼 기억하고 있다는 걸 말하고, 이번엔 다른 걸 해 보고 싶은지 물어봐.',
   '- 처음 시작할 때는 "안녕! 나는 다 친구야."로 인사하고, 좋아하는 것(동물, 놀이, 간식 등)을 물어봐.',
   '- cards: 아이가 다음에 누를 만한 대답 카드 정확히 4개. 서로 다른 방향의 대답이 되게 골라.. text는 2~8글자.',
   '- 각 카드의 icon: text를 바로 알아볼 수 있는 이모지 1개.',
@@ -171,6 +172,9 @@ function chat_(history) {
   const headers = { 'x-api-key': key, 'anthropic-version': '2023-06-01' };
   if (model.indexOf('haiku') < 0) {
     payload.output_config.effort = 'low'; // 짧은 대답이라 빠르게 (Haiku는 effort 미지원)
+  }
+  if (model.indexOf('sonnet-5') >= 0) {
+    payload.thinking = { type: 'disabled' }; // 40자 대답에는 깊은 생각이 필요 없어 속도 우선
   }
   if (model.indexOf('opus-5') >= 0) {
     payload.fallbacks = 'default'; // 안전 판단으로 거절되면 서버에서 다른 모델로 다시 시도

@@ -405,8 +405,7 @@
           row[item.id] = answers[item.id] || "";
         }
       }
-      render(`<p class="kid-q">잘했어요!</p><p class="small">저장 중…</p>`);
-      await saveRecord("사전조사", row);
+      saveRecord("사전조사", row);
       sessionIntro(1);
     }
 
@@ -420,6 +419,7 @@
   function sessionIntro(n) {
     state.inSession = true;
     const f = K.friends[n - 1];
+    if (f.type === "gen" && !DEMO) api("ping").catch(() => {}); // 서버가 잠들어 있으면 미리 깨움
     render(`
       <p class="kid-sub">세션 ${n}</p>
       <p class="kid-q">${esc(f.name)}를\n만나 볼까요?</p>
@@ -542,8 +542,20 @@
     // ── 다 친구: 실시간 생성 ──
     const history = [];
     let usedModel = "";
+    const chosen = [];
     async function genReply(childText) {
-      if (childText !== null) history.push({ role: "user", content: childText });
+      if (childText !== null) {
+        // 전에 골랐던 카드를 또 고르면 그 사실을 알려 줌 (응/아니/몰라 같은 대답말은 제외)
+        const again = !answerIcon(childText) && chosen.includes(childText);
+        chosen.push(childText);
+        if (again) addLog("메모", "같은 카드 다시 고름");
+        history.push({
+          role: "user",
+          content: again
+            ? `${childText}\n(아이가 이 카드를 아까도 골랐어. 기억하고 있다는 걸 말해 주고, 이번엔 다른 걸 해 보고 싶은지 물어봐.)`
+            : childText,
+        });
+      }
       const res = await api("chat", { history });
       if (res.model) usedModel = res.model;
       const cards = (res.cards || []).slice(0, 4);
@@ -653,8 +665,7 @@
         연구자메모: q("#memo").value.trim(),
         ...sessionData,
       };
-      render(`<p class="kid-q">고마워요!</p><p class="small">저장 중…</p>`);
-      await saveRecord(`세션${n}`, row);
+      saveRecord(`세션${n}`, row);
       if (n < 3) sessionIntro(n + 1);
       else doneScreen();
     };
