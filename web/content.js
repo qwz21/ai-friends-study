@@ -38,6 +38,12 @@ window.CONTENT = {
 
   // 세션 후 질문
   judgeQuestion: (name) => `${name}는\n인공지능일까요?`,
+  // 예/아니요/모르겠다 형태의 선택지에 붙는 기호 (사전 조사 버튼, 판단 버튼, 대화 카드 공통)
+  answerIcons: [
+    { match: /^(네|예|응|그래|그래요|맞아)$/, icon: "⭕" },
+    { match: /^(아니|아니야|아니요|아니에요)$/, icon: "❌" },
+    { match: /^(몰라|몰라요|모르겠어|모르겠어요|잘 모르겠어)$/, icon: "❓" },
+  ],
   judgeOptions: [
     { label: "그래요", value: "그렇다" },
     { label: "아니에요", value: "아니다" },

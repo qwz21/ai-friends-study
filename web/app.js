@@ -256,6 +256,27 @@
     if (state.inSession) { e.preventDefault(); e.returnValue = ""; }
   });
 
+  // ── 그림·기호 규칙 ──────────────────────────
+  // 예/아니요/모르겠다 → ⭕ ❌ ❓
+  function answerIcon(text) {
+    const hit = K.answerIcons.find((a) => a.match.test(String(text).trim()));
+    return hit ? hit.icon : "";
+  }
+  // 선택 버튼: 같은 질문의 버튼 모두에 기호가 있을 때만 글자 위에 표시
+  function choiceLabel(text, group) {
+    const icon = group.every((g) => answerIcon(g)) ? answerIcon(text) : "";
+    return `${icon ? `<span class="pic">${icon}</span>` : ""}${esc(text)}`;
+  }
+  // 대화 카드: 4장 모두 그림이 있을 때만 그림을 보여 줌 (한 장만 그림이 있으면 그 카드로 쏠리므로)
+  function cardsWithIcons(cards) {
+    const list = cards.map((c) => {
+      const text = typeof c === "string" ? c : String(c.text);
+      const icon = (typeof c === "object" && c.icon) || answerIcon(text);
+      return { text, icon };
+    });
+    return list.every((c) => c.icon) ? list : list.map((c) => ({ text: c.text, icon: "" }));
+  }
+
   // ════════════════════════════════════════════
   // 시작 화면 (연구자용)
   // ════════════════════════════════════════════
@@ -341,7 +362,7 @@
         render(`
           <p class="kid-q">${esc(item.q)}</p>
           <div class="choices">
-            ${item.options.map((o) => `<button class="choice ${answers[item.id] === o ? "selected" : ""}" data-v="${esc(o)}">${esc(o)}</button>`).join("")}
+            ${item.options.map((o) => `<button class="choice ${answers[item.id] === o ? "selected" : ""}" data-v="${esc(o)}">${choiceLabel(o, item.options)}</button>`).join("")}
           </div>${navHTML}`);
         qa(".choice").forEach((b) => (b.onclick = () => { answers[item.id] = b.dataset.v; next(); }));
       } else if (item.type === "experience") {
@@ -477,7 +498,7 @@
       latencies.push(took);
       if (took < C.RESPONSE_DELAY_MS) await sleep(C.RESPONSE_DELAY_MS - took);
       // 카드는 "글자" 또는 {text, icon} — 하나로 맞춤
-      lastCards = reply.cards.map((c) => (typeof c === "string" ? { text: c, icon: "" } : { text: String(c.text), icon: c.icon || "" }));
+      lastCards = reply.calc ? reply.cards.map((c) => ({ text: c, icon: "" })) : cardsWithIcons(reply.cards);
       await friendSays(reply.say, lastCards, reply.calc);
       busy = false;
     }
@@ -595,7 +616,7 @@
     render(`
       <p class="kid-q">${esc(K.judgeQuestion(f.name))}</p>
       <div class="choices">
-        ${K.judgeOptions.map((o) => `<button class="choice ${cls[o.value]}" data-v="${o.value}">${esc(o.label)}</button>`).join("")}
+        ${K.judgeOptions.map((o) => `<button class="choice ${cls[o.value]}" data-v="${o.value}">${choiceLabel(o.label, K.judgeOptions.map((j) => j.label))}</button>`).join("")}
       </div>`);
     qa(".choice").forEach((b) => (b.onclick = () => reasonScreen(n, sessionData, b.dataset.v)));
   }

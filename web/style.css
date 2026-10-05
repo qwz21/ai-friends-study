@@ -161,7 +161,7 @@ textarea, input { user-select: text; -webkit-user-select: text; font-family: var
   font-size: 34px; line-height: 1; cursor: pointer; padding: 0;
 }
 .say-btn:active { transform: scale(.92); }
-.card .pic { display: block; font-size: 1.5em; line-height: 1.1; margin-bottom: 4px; }
+.card .pic, .choice .pic { display: block; font-size: 1.5em; line-height: 1.1; margin-bottom: 4px; }
 .cards.calc { display: grid; grid-template-columns: repeat(5, 1fr); max-width: 760px; width: 100%; }
 .cards.calc .card.op:last-child { grid-column: span 2; }
 .card {
