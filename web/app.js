@@ -662,8 +662,7 @@
       judgeScreen(n, {
         시작시각: new Date(t0).toLocaleString("sv-SE").slice(0, 19),
         체험시간_초: Math.round((Date.now() - t0) / 1000),
-        끝내기안내_기준: hint.turns ? `${hint.turns}번` : hint.seconds ? `${hint.seconds}초` : "",
-        끝내기안내_시점_초: hintAt ?? "",
+        ...(hint.turns || hint.seconds ? { 끝내기안내_시점_초: hintAt ?? "" } : {}),
         아이_입력횟수: childTurns,
         설정_대기시간_ms: C.RESPONSE_DELAY_MS,
         실제_처리시간_최대ms: latencies.length ? Math.max(...latencies) : 0,

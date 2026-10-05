@@ -30,11 +30,11 @@ window.CONTENT = {
   // ── 세션 (순서 고정: 가 → 나 → 다) ─────────────
   friends: [
     // color: 얼굴·말풍선 바탕색, line: 테두리색
-    // endHint: 이 조건이 되면 오른쪽 아래 "체험 끝" 버튼이 반짝임 (seconds: 체험 시간, turns: 아이가 누른 횟수)
-    { session: 1, name: "가 친구", type: "calc", color: "#ffe9a8", line: "#f2c94c", endHint: { seconds: 30 },
+    // endHint를 넣으면 그 조건에서 "체험 끝" 버튼이 반짝임 (예: endHint: { turns: 10 } 또는 { seconds: 30 }) — 지금은 쓰지 않음
+    { session: 1, name: "가 친구", type: "calc", color: "#ffe9a8", line: "#f2c94c",
       greeting: "안녕! 나는 가 친구야. 숫자 카드를 눌러서 문제를 내 줘." },
-    { session: 2, name: "나 친구", type: "tree", color: "#c9efd4", line: "#5cbf7d", endHint: { seconds: 30 } },
-    { session: 3, name: "다 친구", type: "gen", color: "#ffd6e0", line: "#ee7b9b", endHint: { turns: 10 } },
+    { session: 2, name: "나 친구", type: "tree", color: "#c9efd4", line: "#5cbf7d" },
+    { session: 3, name: "다 친구", type: "gen", color: "#ffd6e0", line: "#ee7b9b" },
   ],
 
   // 세션 후 질문
