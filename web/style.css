@@ -131,26 +131,8 @@ textarea, input { user-select: text; -webkit-user-select: text; font-family: var
 }
 .avatar { position: relative; }
 .avatar svg { width: 100px; height: 100px; }
-.avatar .face-think, .avatar .think-cloud { display: none; }
-.avatar.thinking .face-normal { display: none; }
-.avatar.thinking .face-think { display: block; animation: tilt 1.6s ease-in-out infinite alternate; }
-.avatar.thinking .pupil { animation: look 1.6s ease-in-out infinite alternate; }
-@keyframes tilt { from { transform: rotate(-6deg); } to { transform: rotate(6deg); } }
-@keyframes look { from { transform: translateX(-5px); } to { transform: translateX(2px); } }
-/* 머리 위 생각 구름 */
-.avatar.thinking .think-cloud { display: block; position: absolute; top: -34px; right: -26px; width: 64px; height: 50px; }
-.think-cloud i { position: absolute; border-radius: 50%; background: #fff; border: 3px solid var(--friend-line); }
-.think-cloud i:nth-child(1) { width: 12px; height: 12px; left: 0; bottom: 0; }
-.think-cloud i:nth-child(2) { width: 18px; height: 18px; left: 12px; bottom: 10px; }
-.think-cloud b {
-  position: absolute; right: 0; top: 0; width: 38px; height: 34px; border-radius: 50%;
-  background: #fff; border: 3px solid var(--friend-line); display: grid; place-items: center;
-  font-family: var(--kid-font); font-size: 22px; color: var(--primary);
-  animation: pop 1s ease-in-out infinite alternate;
-}
-@keyframes pop { from { transform: scale(.9); } to { transform: scale(1.08); } }
 @media (prefers-reduced-motion: reduce) {
-  .avatar.thinking .face-think, .avatar.thinking .pupil, .think-cloud b, .avatar.talking, .dots span { animation: none; }
+  .avatar.talking, .dots span { animation: none; }
 }
 .avatar.talking { animation: bob .5s ease-in-out infinite alternate; }
 @keyframes bob { from { transform: translateY(0); } to { transform: translateY(-6px); } }

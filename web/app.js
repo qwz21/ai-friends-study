@@ -410,18 +410,9 @@
     q("#go").onclick = () => friendSession(n);
   }
 
-  // 얼굴 두 개: 평소(웃는 얼굴) / 생각 중(눈을 위로 굴리고 입을 다문 얼굴) — 세 친구 모두 같음
-  const AVATAR_SVG = `
-    <svg class="face-normal" viewBox="0 0 100 100" aria-hidden="true">
-      <circle cx="35" cy="42" r="7" fill="#2b2b2b"/><circle cx="65" cy="42" r="7" fill="#2b2b2b"/>
-      <path d="M32 64 Q50 78 68 64" stroke="#2b2b2b" stroke-width="6" fill="none" stroke-linecap="round"/></svg>
-    <svg class="face-think" viewBox="0 0 100 100" aria-hidden="true">
-      <path d="M26 30 L42 27" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round"/>
-      <path d="M58 25 L74 30" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round"/>
-      <circle cx="35" cy="42" r="8" fill="#fff" stroke="#2b2b2b" stroke-width="3"/><circle cx="65" cy="42" r="8" fill="#fff" stroke="#2b2b2b" stroke-width="3"/>
-      <circle class="pupil" cx="38" cy="38" r="4" fill="#2b2b2b"/><circle class="pupil" cx="68" cy="38" r="4" fill="#2b2b2b"/>
-      <path d="M42 68 Q50 64 58 68" stroke="#2b2b2b" stroke-width="5" fill="none" stroke-linecap="round"/></svg>
-    <span class="think-cloud" aria-hidden="true"><i></i><i></i><b>?</b></span>`;
+  const AVATAR_SVG = `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="35" cy="42" r="7" fill="#2b2b2b"/><circle cx="65" cy="42" r="7" fill="#2b2b2b"/>
+    <path d="M32 64 Q50 78 68 64" stroke="#2b2b2b" stroke-width="6" fill="none" stroke-linecap="round"/></svg>`;
 
   // 세 친구가 같은 화면·같은 대기 시간·같은 목소리를 쓰도록 공통 엔진에서 처리
   function friendSession(n) {
@@ -449,13 +440,11 @@
     function thinking() {
       $bubble.innerHTML = `<span class="dots"><span></span><span></span><span></span></span>`;
       $cards.classList.add("waiting");
-      $av.classList.add("thinking");
     }
 
     async function friendSays(text, cards, calcLayout = false) {
       addLog("친구", text);
       $bubble.textContent = text;
-      $av.classList.remove("thinking");
       $cards.className = `cards ${calcLayout ? "calc" : "choice4"}`;
       if (calcLayout) {
         $cards.innerHTML = cards.map((c, k) => `<button class="card ${/^[+−=]$|지우기/.test(c.text) ? "op" : ""}" data-k="${k}">${esc(c.text)}</button>`).join("");
