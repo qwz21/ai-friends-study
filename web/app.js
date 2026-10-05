@@ -123,10 +123,26 @@
     pickVoice();
     speechSynthesis.onvoiceschanged = pickVoice;
   }
+  // 아이패드(사파리)는 손가락으로 누른 순간에 한 번 말해야 그 뒤 음성을 허락함
+  // → 버튼을 누를 때마다 빈 음성으로 깨워 둠
+  let ttsUnlocked = false;
+  function unlockTTS() {
+    if (ttsUnlocked || !window.speechSynthesis) return;
+    const u = new SpeechSynthesisUtterance(" ");
+    u.volume = 0;
+    u.lang = "ko-KR";
+    speechSynthesis.speak(u);
+    ttsUnlocked = true;
+  }
+  document.addEventListener("pointerdown", unlockTTS, true);
+  document.addEventListener("touchend", unlockTTS, true);
+
   function speak(text) {
     return new Promise((resolve) => {
       if (!window.speechSynthesis) return resolve();
-      speechSynthesis.cancel();
+      const wasBusy = speechSynthesis.speaking || speechSynthesis.pending;
+      if (wasBusy) speechSynthesis.cancel();
+      speechSynthesis.resume(); // 사파리에서 멈춤 상태로 남는 경우 대비
       const u = new SpeechSynthesisUtterance(text);
       u.lang = "ko-KR";
       u.rate = C.TTS_RATE;
@@ -134,7 +150,9 @@
       // 일부 기기에서 onend가 오지 않아도 멈추지 않도록 시간 제한
       const limit = setTimeout(resolve, 1500 + text.length * 250);
       u.onend = u.onerror = () => { clearTimeout(limit); resolve(); };
-      speechSynthesis.speak(u);
+      // 사파리는 cancel 직후 바로 말하면 무시하는 경우가 있어 잠깐 띄움
+      if (wasBusy) setTimeout(() => speechSynthesis.speak(u), 80);
+      else speechSynthesis.speak(u);
     });
   }
 
