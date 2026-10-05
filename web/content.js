@@ -34,7 +34,9 @@ window.CONTENT = {
     { session: 1, name: "가 친구", type: "calc", color: "#ffe9a8", line: "#f2c94c",
       greeting: "안녕! 나는 가 친구야. 숫자 카드를 눌러서 문제를 내 줘." },
     { session: 2, name: "나 친구", type: "tree", color: "#c9efd4", line: "#5cbf7d" },
-    { session: 3, name: "다 친구", type: "gen", color: "#ffd6e0", line: "#ee7b9b" },
+    // stopCard: 생성된 카드 4장 아래에 항상 붙는 다섯 번째 카드 (누르면 인사 후 질문 화면으로)
+    { session: 3, name: "다 친구", type: "gen", color: "#ffd6e0", line: "#ee7b9b",
+      stopCard: { text: "그만 이야기할래", icon: "👋", reply: "알겠어. 같이 이야기해서 즐거웠어!" } },
   ],
 
   // 세션 후 질문

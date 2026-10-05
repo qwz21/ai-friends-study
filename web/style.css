@@ -153,6 +153,12 @@ textarea, input { user-select: text; -webkit-user-select: text; font-family: var
 /* 대화 카드 4개: 2×2, 카드 옆에 스피커 버튼 */
 .cards.choice4 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 28px; max-width: 920px; width: 100%; }
 .card-wrap { display: flex; align-items: stretch; gap: 12px; }
+/* 카드 5장일 때는 한 화면에 들어가도록 조금 작게 */
+.cards.five { gap: 12px 28px; }
+.cards.five .card { min-height: 88px; padding: 8px 16px; font-size: clamp(26px, 3.6vw, 38px); }
+.cards.five .card .pic { font-size: 1.25em; margin-bottom: 0; }
+.cards.five .say-btn { width: 64px; height: 64px; font-size: 28px; }
+.card-wrap.wide { grid-column: 1 / -1; width: min(100%, 446px); justify-self: center; }
 .card-wrap .card { flex: 1; min-width: 0; }
 .card-wrap .say-btn { align-self: center; }
 .say-btn {

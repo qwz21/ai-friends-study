@@ -1,7 +1,7 @@
 // 웹앱 설정 — 배포 후 API_URL만 채우면 됩니다.
 window.APP_CONFIG = {
   // 화면을 고칠 때마다 올려 주세요. 시트의 모든 줄에 함께 기록됩니다 (어느 버전으로 조사했는지 확인용).
-  APP_VERSION: "pilot-8",
+  APP_VERSION: "pilot-9",
 
   // Apps Script 웹앱 배포 URL (https://script.google.com/macros/s/.../exec)
   // 비워 두면 "연습 모드": 시트로 보내지 않고 이 기기에만 저장, 다 친구는 가짜 대답을 씁니다.

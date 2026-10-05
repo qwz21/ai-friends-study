@@ -485,13 +485,13 @@
     async function friendSays(text, cards, calcLayout = false) {
       addLog("친구", text);
       $bubble.textContent = text;
-      $cards.className = `cards ${calcLayout ? "calc" : "choice4"}`;
+      $cards.className = `cards ${calcLayout ? "calc" : "choice4"}${cards.length === 5 ? " five" : ""}`;
       if (calcLayout) {
         $cards.innerHTML = cards.map((c, k) => `<button class="card ${/^[+−=]$|지우기/.test(c.text) ? "op" : ""}" data-k="${k}">${esc(c.text)}</button>`).join("");
       } else {
         // 대화 카드: 카드 + 옆의 스피커 버튼(누르면 카드 글자를 읽어 줌)
         $cards.innerHTML = cards.map((c, k) => `
-          <div class="card-wrap">
+          <div class="card-wrap${cards.length === 5 && k === 4 ? " wide" : ""}">
             <button class="card" data-k="${k}">${c.icon ? `<span class="pic">${esc(c.icon)}</span>` : ""}${esc(c.text)}</button>
             <button class="say-btn" data-say="${k}" aria-label="${esc(c.text)} 듣기">🔊</button>
           </div>`).join("");
@@ -519,7 +519,9 @@
       latencies.push(took);
       if (took < C.RESPONSE_DELAY_MS) await sleep(C.RESPONSE_DELAY_MS - took);
       // 카드는 "글자" 또는 {text, icon} — 하나로 맞춤
-      lastCards = reply.calc ? reply.cards.map((c) => ({ text: c, icon: "" })) : cardsWithIcons(reply.cards);
+      let cardList = reply.cards;
+      if (f.stopCard && !cardList.some((c) => (c.text || c) === f.stopCard.text)) cardList = [...cardList, f.stopCard];
+      lastCards = reply.calc ? reply.cards.map((c) => ({ text: c, icon: "" })) : cardsWithIcons(cardList);
       await friendSays(reply.say, lastCards, reply.calc);
       if (f.type === "gen" && !errorReply) prefetchAll();
       busy = false;
@@ -590,6 +592,7 @@
     function prefetchAll() {
       prefetched = {};
       for (const c of lastCards) {
+        if (f.stopCard && c.text === f.stopCard.text) continue;
         const p = requestReply([...history, userMessage(c.text).msg]);
         p.catch(() => {}); // 실패하면 누를 때 다시 요청
         prefetched[c.text] = p;
@@ -631,6 +634,7 @@
       if (!btn || busy) return;
       const label = lastCards[Number(btn.dataset.k)].text;
       if (f.type === "calc") return onCalcTap(label);
+      if (f.stopCard && label === f.stopCard.text) return stopByChild(label);
       addLog("아이", label);
       $child.textContent = label;
       if (f.type === "tree") {
@@ -657,9 +661,29 @@
         setTimeout(() => { endArmed = false; if (endBtn.isConnected) endBtn.textContent = "체험 끝 ▶"; }, 3000);
         return;
       }
+      finishSession("연구자");
+    };
+
+    // 아이가 "그만 이야기할래"를 고르면: 같은 대기 시간 뒤 인사하고 질문 화면으로
+    async function stopByChild(label) {
+      busy = true;
+      addLog("아이", label);
+      $child.textContent = label;
+      thinking();
+      await sleep(C.RESPONSE_DELAY_MS);
+      $bubble.textContent = f.stopCard.reply;
+      addLog("친구", f.stopCard.reply);
+      $cards.innerHTML = "";
+      await speak(f.stopCard.reply);
+      await sleep(1200);
+      if (q("#end")) finishSession("아이가 그만");
+    }
+
+    function finishSession(how) {
       speechSynthesis?.cancel();
       const childTurns = log.filter((l) => l.who === "아이").length;
       judgeScreen(n, {
+        끝낸방법: how,
         시작시각: new Date(t0).toLocaleString("sv-SE").slice(0, 19),
         체험시간_초: Math.round((Date.now() - t0) / 1000),
         ...(hint.turns || hint.seconds ? { 끝내기안내_시점_초: hintAt ?? "" } : {}),
@@ -673,7 +697,7 @@
         ...(f.type === "gen" ? { AI모델: usedModel } : {}),
         대화기록: log.map((l) => `[${l.t}s] ${l.who}: ${l.text}`).join("\n"),
       });
-    };
+    }
   }
 
   // 숫자 읽기의 받침에 따라 조사 고르기 (이·사·오·구로 끝나면 받침 없음)
