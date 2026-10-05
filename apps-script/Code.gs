@@ -9,12 +9,12 @@
  * 스크립트 속성 (프로젝트 설정 → 스크립트 속성)
  *  - ANTHROPIC_API_KEY : Claude API 키 (필수, 다 친구용)
  *  - APP_TOKEN         : (선택) 웹앱 config.js의 APP_TOKEN과 같은 값
- *  - MODEL             : (선택) 다 친구 모델. 비우면 claude-sonnet-5
+ *  - MODEL             : (선택) 다 친구 모델. 비우면 claude-haiku-4-5
  *                        예) claude-haiku-4-5, claude-sonnet-5 — 바꾸고 재배포할 필요 없음
  *  - AUDIO_FOLDER_ID   : (자동) setup() 실행 시 만들어짐
  */
 
-const DEFAULT_MODEL = 'claude-sonnet-5';
+const DEFAULT_MODEL = 'claude-haiku-4-5';
 
 // 다 친구 지시문 — 나 친구와 말투·길이를 맞추고, 정체를 밝히지 않게 함
 const SYSTEM_PROMPT = [
@@ -25,6 +25,14 @@ const SYSTEM_PROMPT = [
   '- say: 반말로 1~2문장, 40자 안팎. 1학년이 아는 쉬운 낱말만 써.',
   '- 아이가 누른 카드 내용에 맞게 대답하고, 앞에서 나온 이야기를 기억해서 이어 가.',
   '- 같은 말을 되풀이하지 말고 매번 조금씩 다르게 말해.',
+  '',
+  '대화를 다채롭게',
+  '- 매번 같은 방식으로 묻지 말고 돌아가며 섞어 써: 궁금한 걸 묻기, 재미있는 사실 하나 알려 주기, 수수께끼나 맞히기 놀이,',
+  '  "~라고 상상해 볼까?" 같은 상상 놀이, 아이 선택에 맞장구치기.',
+  '- 예/아니 질문을 두 번 연달아 하지 마.',
+  '- 한 주제로 3번쯤 이야기했으면 관련된 새 주제로 자연스럽게 넘어가 (예: 강아지 → 산책 → 공원 → 놀이터).',
+  '- 카드 4개는 서로 다른 방향이 되게 하고, "몰라" 카드는 꼭 필요할 때만 넣어 (매번 넣지 마).',
+  '- 네 몸, 가족, 집, 어제 한 일처럼 너 자신의 경험이 있는 것처럼 말하지 마. 아이 이야기에 관심을 보여 줘.',
   '- 아이가 전에 골랐던 카드를 또 고르면 "아까도 ○○ 골랐지?"처럼 기억하고 있다는 걸 말하고, 이번엔 다른 걸 해 보고 싶은지 물어봐.',
   '- 처음 시작할 때는 "안녕! 나는 다 친구야."로 인사하고, 좋아하는 것(동물, 놀이, 간식 등)을 물어봐.',
   '- cards: 아이가 다음에 누를 만한 대답 카드 정확히 4개. 서로 다른 방향의 대답이 되게 골라.. text는 2~8글자.',
@@ -68,7 +76,7 @@ function doPost(e) {
     switch (req.action) {
       case 'save': out = saveRow_(req.sheet, req.row); break;
       case 'upload': out = uploadAudio_(req.filename, req.mimeType, req.data); break;
-      case 'chat': out = chat_(req.history || []); break;
+      case 'chat': out = chat_(req.history || [], req.model); break;
       case 'ping': out = { ok: true }; break;
       default: throw new Error('알 수 없는 요청: ' + req.action);
     }
@@ -145,11 +153,13 @@ function getAudioFolder_() {
 }
 
 // ── 다 친구 (Claude API) ─────────────────────────
-function chat_(history) {
+function chat_(history, modelOverride) {
   const props = PropertiesService.getScriptProperties();
   const key = props.getProperty('ANTHROPIC_API_KEY');
   if (!key) throw new Error('ANTHROPIC_API_KEY가 설정되지 않았어요');
-  const model = props.getProperty('MODEL') || DEFAULT_MODEL;
+  // 비교 시험용: 허용된 모델만 요청에서 바꿀 수 있음
+  const TESTABLE = ['claude-haiku-4-5', 'claude-sonnet-5'];
+  const model = TESTABLE.indexOf(modelOverride) >= 0 ? modelOverride : (props.getProperty('MODEL') || DEFAULT_MODEL);
 
   // 웹앱에서 온 대화 기록: user=아이가 누른 카드, assistant=이전 대답(JSON)
   const messages = history
