@@ -201,6 +201,48 @@ function chat_(history) {
   };
 }
 
+// ── 시트 메뉴: 편집기를 열지 않고 키 넣기·시험하기 ──────────
+function onOpen() {
+  SpreadsheetApp.getUi().createMenu('친구 웹앱')
+    .addItem('① Claude API 키 넣기', 'menuSetKey')
+    .addItem('② 다 친구 연결 시험', 'menuTest')
+    .addSeparator()
+    .addItem('녹음 폴더 열기 주소', 'menuShowFolder')
+    .addToUi();
+}
+
+function menuSetKey() {
+  const ui = SpreadsheetApp.getUi();
+  const res = ui.prompt('Claude API 키 넣기',
+    'console.anthropic.com에서 만든 키를 붙여넣으세요.\n(sk-ant-api03- 로 시작)\n\n키는 이 시트의 스크립트 속성에만 저장됩니다.',
+    ui.ButtonSet.OK_CANCEL);
+  if (res.getSelectedButton() !== ui.Button.OK) return;
+  const key = res.getResponseText().trim();
+  if (!/^sk-ant-/.test(key)) {
+    ui.alert('키 모양이 아니에요', 'sk-ant- 로 시작하는 키를 붙여넣어 주세요.', ui.ButtonSet.OK);
+    return;
+  }
+  PropertiesService.getScriptProperties().setProperty('ANTHROPIC_API_KEY', key);
+  setup();
+  ui.alert('저장했어요', '이제 메뉴의 ② 다 친구 연결 시험을 눌러 보세요.', ui.ButtonSet.OK);
+}
+
+function menuTest() {
+  const ui = SpreadsheetApp.getUi();
+  try {
+    const r = chat_([]);
+    ui.alert('연결 성공 ✓',
+      '다 친구: ' + r.say + '\n카드: ' + r.cards.map(c => c.icon + c.text).join(' / ') +
+      '\n\n모델 ' + r.model + ' · ' + (r.ms / 1000).toFixed(1) + '초', ui.ButtonSet.OK);
+  } catch (e) {
+    ui.alert('연결 실패', String(e.message || e), ui.ButtonSet.OK);
+  }
+}
+
+function menuShowFolder() {
+  SpreadsheetApp.getUi().alert('녹음 폴더', getAudioFolder_().getUrl(), SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
 // ── 설치·점검용 (편집기에서 직접 실행) ───────────────
 /** 처음 한 번 실행: 권한 승인 + 녹음 폴더 만들기 + 탭 만들기 */
 function setup() {

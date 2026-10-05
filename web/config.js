@@ -5,7 +5,7 @@ window.APP_CONFIG = {
 
   // Apps Script 웹앱 배포 URL (https://script.google.com/macros/s/.../exec)
   // 비워 두면 "연습 모드": 시트로 보내지 않고 이 기기에만 저장, 다 친구는 가짜 대답을 씁니다.
-  API_URL: "",
+  API_URL: "https://script.google.com/macros/s/AKfycbzF0PpFoCFRdscTbxubKgbpo1IpgpkaZyv4cCPh1ft0zIfOreOhTV3axR8TQWbpNVZR/exec",
 
   // Apps Script 스크립트 속성 APP_TOKEN과 같은 값 (설정하지 않았으면 비워 둠)
   APP_TOKEN: "",
