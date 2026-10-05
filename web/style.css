@@ -76,7 +76,7 @@ textarea, input { user-select: text; -webkit-user-select: text; font-family: var
   padding: 24px 40px;
 }
 .exp-card .icon { font-size: 110px; line-height: 1; }
-.exp-card img { max-width: 320px; max-height: 240px; border-radius: 12px; }
+.exp-card img { width: min(420px, 80vw); aspect-ratio: 4 / 3; object-fit: cover; border-radius: 14px; max-width: 100%; }
 .exp-card .label { font-family: var(--kid-font); font-size: clamp(34px, 5vw, 52px); }
 
 /* 연구자(교사) 영역 */

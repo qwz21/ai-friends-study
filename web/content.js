@@ -7,17 +7,17 @@ window.CONTENT = {
     { id: "성별", type: "choice", q: "남자예요, 여자예요?",
       options: ["남자", "여자"] },
 
-    // 사용 경험: 카드 한 장씩 (img에 사진 경로를 넣으면 그림 대신 사진이 나옵니다. 예: "img/speaker.jpg")
+    // 사용 경험: 카드 한 장씩 (img에 사진 경로를 넣으면 그림 대신 사진이 나옵니다. 사진은 web/img/ 에, 출처는 img/CREDITS.md 에)
     { id: "경험_말하는스피커", type: "experience", q: "이거 써 본 적 있어요?",
-      icon: "🔊", label: "말하는 스피커", sub: "\"지니야\", \"헤이 카카오\"", img: "" },
+      icon: "🔊", label: "말하는 스피커", sub: "\"지니야\", \"헤이 카카오\"", img: "img/speaker.jpg" },
     { id: "경험_휴대폰음성비서", type: "experience", q: "이거 써 본 적 있어요?",
       icon: "📱", label: "휴대폰에 말하기", sub: "\"시리야\", \"하이 빅스비\"", img: "" },
     { id: "경험_챗GPT", type: "experience", q: "이거 써 본 적 있어요?",
       icon: "💬", label: "챗GPT", sub: "묻고 답하는 프로그램", img: "" },
     { id: "경험_로봇청소기", type: "experience", q: "이거 써 본 적 있어요?",
-      icon: "🧹", label: "로봇청소기", sub: "", img: "" },
+      icon: "🧹", label: "로봇청소기", sub: "", img: "img/robot-vacuum.jpg" },
     { id: "경험_태블릿앱", type: "experience", q: "이거 써 본 적 있어요?",
-      icon: "🎮", label: "태블릿 게임·학습앱", sub: "", img: "" },
+      icon: "🎮", label: "태블릿 게임·학습앱", sub: "", img: "img/tablet.jpg" },
 
     { id: "인공지능_들어봄", type: "choice", q: "'인공지능'이라는 말\n들어 봤어요?",
       options: ["네", "아니요", "모르겠어요"] },

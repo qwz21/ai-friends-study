@@ -258,6 +258,7 @@
           <button class="btn ghost" id="voice-test">🔊 목소리 확인</button>
         </div>
         <p class="small">목소리: ${esc(voice ? voice.name : "기기 기본 한국어")} · 대기 시간 ${C.RESPONSE_DELAY_MS / 1000}초</p>
+        <p class="small">사진 출처: 위키미디어 공용 (CC BY / CC BY-SA) — <a href="img/CREDITS.md" target="_blank">자세히</a> · 버전 ${esc(C.APP_VERSION || "")}</p>
         <div class="row">
           ${pending ? `<button class="btn" id="flush">미전송 ${pending}건 다시 보내기</button>` : ""}
           <button class="btn ghost" id="backup">이 기기 백업 내려받기</button>
