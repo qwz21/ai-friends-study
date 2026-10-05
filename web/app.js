@@ -419,7 +419,11 @@
   function sessionIntro(n) {
     state.inSession = true;
     const f = K.friends[n - 1];
-    if (f.type === "gen" && !DEMO) api("ping").catch(() => {}); // 서버가 잠들어 있으면 미리 깨움
+    // 다 친구: 소개 화면에서 첫 인사를 미리 받아 둠 (서버도 함께 깨어남)
+    if (f.type === "gen") {
+      state.greetingPromise = api("chat", { history: [] }).then((res) => ({ say: res.say, cards: (res.cards || []).slice(0, 4), model: res.model }));
+      state.greetingPromise.catch(() => { state.greetingPromise = null; });
+    }
     render(`
       <p class="kid-sub">세션 ${n}</p>
       <p class="kid-q">${esc(f.name)}를\n만나 볼까요?</p>
@@ -487,11 +491,13 @@
       thinking();
       const start = Date.now();
       let reply;
+      let errorReply = false;
       try {
         reply = await getReply();
       } catch (e) {
         errors++;
         reply = { say: "다시 한번 눌러 줄래?", cards: lastCards };
+        errorReply = true;
         addLog("오류", String(e.message || e));
       }
       const took = Date.now() - start;
@@ -500,6 +506,7 @@
       // 카드는 "글자" 또는 {text, icon} — 하나로 맞춤
       lastCards = reply.calc ? reply.cards.map((c) => ({ text: c, icon: "" })) : cardsWithIcons(reply.cards);
       await friendSays(reply.say, lastCards, reply.calc);
+      if (f.type === "gen" && !errorReply) prefetchAll();
       busy = false;
     }
     let lastCards = [];
@@ -543,24 +550,58 @@
     const history = [];
     let usedModel = "";
     const chosen = [];
-    async function genReply(childText) {
-      if (childText !== null) {
-        // 전에 골랐던 카드를 또 고르면 그 사실을 알려 줌 (응/아니/몰라 같은 대답말은 제외)
-        const again = !answerIcon(childText) && chosen.includes(childText);
-        chosen.push(childText);
-        if (again) addLog("메모", "같은 카드 다시 고름");
-        history.push({
+    let prefetched = {}; // 카드 글자 → 그 카드를 눌렀을 때의 대답(Promise)
+    let prefetchHits = 0, prefetchTotal = 0;
+
+    // 아이가 이 카드를 누르면 보낼 메시지 (전에 골랐던 카드면 기억하라는 메모를 붙임, 응/아니/몰라는 제외)
+    function userMessage(childText) {
+      const again = !answerIcon(childText) && chosen.includes(childText);
+      return {
+        again,
+        msg: {
           role: "user",
           content: again
             ? `${childText}\n(아이가 이 카드를 아까도 골랐어. 기억하고 있다는 걸 말해 주고, 이번엔 다른 걸 해 보고 싶은지 물어봐.)`
             : childText,
-        });
+        },
+      };
+    }
+    async function requestReply(hist) {
+      const res = await api("chat", { history: hist });
+      return { say: res.say, cards: (res.cards || []).slice(0, 4), model: res.model };
+    }
+
+    // 카드 4장이 보이는 순간, 각 카드를 눌렀을 때의 대답을 미리 받아 둠
+    function prefetchAll() {
+      prefetched = {};
+      for (const c of lastCards) {
+        const p = requestReply([...history, userMessage(c.text).msg]);
+        p.catch(() => {}); // 실패하면 누를 때 다시 요청
+        prefetched[c.text] = p;
       }
-      const res = await api("chat", { history });
+    }
+
+    async function genReply(childText) {
+      let res;
+      if (childText === null) {
+        const pre = state.greetingPromise;
+        state.greetingPromise = null;
+        res = await (pre || Promise.reject()).catch(() => requestReply(history));
+      } else {
+        const { again, msg } = userMessage(childText);
+        if (again) addLog("메모", "같은 카드 다시 고름");
+        chosen.push(childText);
+        prefetchTotal++;
+        try {
+          res = prefetched[childText] ? await prefetched[childText] : null;
+          if (res) prefetchHits++;
+        } catch { res = null; }
+        if (!res) res = await requestReply([...history, msg]);
+        history.push(msg);
+      }
       if (res.model) usedModel = res.model;
-      const cards = (res.cards || []).slice(0, 4);
-      history.push({ role: "assistant", content: JSON.stringify({ say: res.say, cards }) });
-      return { say: res.say, cards };
+      history.push({ role: "assistant", content: JSON.stringify({ say: res.say, cards: res.cards }) });
+      return { say: res.say, cards: res.cards };
     }
 
     let listenCount = 0;
@@ -609,6 +650,8 @@
         아이_입력횟수: childTurns,
         설정_대기시간_ms: C.RESPONSE_DELAY_MS,
         실제_처리시간_최대ms: latencies.length ? Math.max(...latencies) : 0,
+        설정초과_횟수: latencies.filter((ms) => ms > C.RESPONSE_DELAY_MS).length,
+        ...(f.type === "gen" ? { 미리받기_적중: `${prefetchHits}/${prefetchTotal}` } : {}),
         오류횟수: errors,
         ...(f.type !== "calc" ? { 카드듣기_횟수: listenCount } : {}),
         ...(f.type === "gen" ? { AI모델: usedModel } : {}),

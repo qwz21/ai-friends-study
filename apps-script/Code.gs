@@ -158,6 +158,10 @@ function chat_(history) {
   if (!messages.length || messages[0].role !== 'user') {
     messages.unshift({ role: 'user', content: '(아이가 화면을 켰어. 먼저 인사해 줘.)' });
   }
+  // 비용 상한: 대화가 길어지면 최근 24개 메시지만 보냄 (첫 메시지는 user여야 함)
+  while (messages.length > 24) messages.shift();
+  while (messages.length && messages[0].role !== 'user') messages.shift();
+  if (!messages.length) messages.push({ role: 'user', content: '(아이가 화면을 켰어. 먼저 인사해 줘.)' });
   if (messages[messages.length - 1].role !== 'user') {
     messages.push({ role: 'user', content: '(아이가 가만히 있어. 이어서 말해 줘.)' });
   }
