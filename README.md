@@ -37,10 +37,11 @@ cd ~/Documents/ai-friends-study/web && python3 -m http.server 8000
 
 > Code.gs를 고친 뒤에는 **배포 → 배포 관리 → 수정(연필) → 버전: 새 버전**으로 다시 배포해야 반영됩니다.
 
-## 2. 화면을 인터넷 주소에 올리기
-녹음(마이크)은 **https 주소**에서만 동작합니다. 무료 방법 두 가지:
-- **GitHub Pages**: 저장소 만들기 → `web` 폴더 내용 올리기 → Settings → Pages
-- **Netlify Drop**: app.netlify.com/drop 에 `web` 폴더를 끌어다 놓기
+## 2. 화면 주소 (GitHub Pages)
+- 주소: **https://qwz21.github.io/ai-friends-study/**
+- 저장소: https://github.com/qwz21/ai-friends-study (공개 — 응답·녹음·API 키는 여기에 올라가지 않음)
+- 업데이트: 파일을 고치고 커밋·푸시하면 1~2분 뒤 같은 주소에 반영됩니다. 패드에서는 새로고침.
+- 고칠 때마다 `config.js`의 `APP_VERSION`을 올려 주세요 (시트에 함께 기록됨).
 
 ## 3. 갤럭시 패드 준비 (조사 전날)
 1. 크롬으로 주소 열기 → 메뉴 → **홈 화면에 추가**
